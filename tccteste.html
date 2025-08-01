@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Assistente Holográfico de TCCs</title>
+<style>
+  /* Fundo com grid neon e animação suave */
+  body {
+    margin: 0; padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background:
+      radial-gradient(circle at center, #00f0ff33, transparent 80%),
+      repeating-linear-gradient(0deg, #00f0ff11, #00f0ff11 1px, transparent 2px, transparent 20px),
+      repeating-linear-gradient(90deg, #00f0ff11, #00f0ff11 1px, transparent 2px, transparent 20px),
+      linear-gradient(135deg, #020024, #090979, #00d4ff);
+    color: #00f0ff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  h1 {
+    font-size: 2.4rem;
+    margin-bottom: 20px;
+    text-shadow:
+      0 0 8px #00f0ff,
+      0 0 20px #00d4ff,
+      0 0 30px #00d4ff;
+    animation: brilho 2.5s ease-in-out infinite;
+    user-select: none;
+  }
+
+  @keyframes brilho {
+    0%, 100% {
+      text-shadow:
+        0 0 8px #00f0ff,
+        0 0 20px #00d4ff,
+        0 0 30px #00d4ff;
+    }
+    50% {
+      text-shadow:
+        0 0 12px #00f0ff,
+        0 0 30px #00d4ff,
+        0 0 45px #00d4ff;
+    }
+  }
+
+  #avatar {
+    width: 160px;
+    border-radius: 50%;
+    box-shadow: 0 0 15px #00f0ff, 0 0 30px #00d4ff inset;
+    filter: brightness(1.4);
+    animation: flutuar 3s ease-in-out infinite;
+    margin-bottom: 25px;
+    user-select: none;
+    transition: width 0.3s ease;
+  }
+  @keyframes flutuar {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  #filtros {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    width: 90%;
+    max-width: 700px;
+    margin-bottom: 20px;
+  }
+
+  .filtro {
+    display: flex;
+    flex-direction: column;
+    min-width: 150px;
+    flex: 1 1 150px;
+  }
+  .filtro label {
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #00e0ffcc;
+    text-shadow: 0 0 6px #00d4ff;
+    user-select: none;
+  }
+  .filtro input {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 2px solid #00f0ff;
+    background: rgba(0, 255, 255, 0.12);
+    color: #00f0ff;
+    font-size: 1em;
+    outline: none;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  .filtro input::placeholder {
+    color: #00f0ff88;
+  }
+  .filtro input:focus {
+    border-color: #00d4ff;
+    box-shadow: 0 0 15px #00d4ff;
+  }
+
+  button {
+    margin-top: 10px;
+    padding: 12px 35px;
+    font-size: 1.1em;
+    background: linear-gradient(135deg, #00f0ff, #00b8d4);
+    border: none;
+    border-radius: 12px;
+    color: #000;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow:
+      0 0 10px #00f0ff,
+      inset 0 0 15px #00d4ff;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+    user-select: none;
+  }
+  button:hover {
+    background: linear-gradient(135deg, #00d4ff, #0099bb);
+    box-shadow:
+      0 0 18px #00e0ff,
+      inset 0 0 20px #00b8d4;
+  }
+
+  #resultados {
+    margin-top: 30px;
+    width: 90%;
+    max-width: 700px;
+    background: rgba(0, 255, 255, 0.12);
+    border-radius: 15px;
+    padding: 25px 30px;
+    box-shadow:
+      0 0 25px #00f0ff,
+      inset 0 0 50px #00d4ff;
+    min-height: 180px;
+    overflow-y: auto;
+    color: #00eaff;
+  }
+  #resultados li {
+    margin-bottom: 18px;
+    line-height: 1.5em;
+    border-bottom: 1px solid #00c7e0;
+    padding-bottom: 12px;
+    transition: background-color 0.3s ease;
+  }
+  #resultados li:last-child {
+    border: none;
+  }
+  #resultados li:hover {
+    background: rgba(0, 255, 255, 0.25);
+    cursor: pointer;
+  }
+  a.tcc-link {
+    color: #00f0ff;
+    text-decoration: underline;
+  }
+  span.link-indisponivel {
+    color: #ff4c4c;
+    font-weight: 700;
+    margin-left: 5px;
+  }
+
+  @media (max-width: 720px) {
+    #filtros {
+      flex-direction: column;
+      align-items: center;
+    }
+    .filtro {
+      width: 100%;
+      max-width: 350px;
+    }
+    button {
+      width: 100%;
+      max-width: 350px;
+    }
+    #avatar {
+      width: 140px;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Avatar holográfico -->
+  <img id="avatar" src="avatar.gif" alt="Avatar Holográfico" />
+
+  <h1>Assistente Holográfico de TCCs</h1>
+
+  <!-- Filtros -->
+  <div id="filtros">
+    <div class="filtro">
+      <label for="inputTema">Tema</label>
+      <input type="text" id="inputTema" placeholder="Digite o tema" />
+    </div>
+    <div class="filtro">
+      <label for="inputOrientador">Orientador</label>
+      <input type="text" id="inputOrientador" placeholder="Nome do orientador" />
+    </div>
+    <div class="filtro">
+      <label for="inputAno">Ano</label>
+      <input type="text" id="inputAno" placeholder="Ex: 2023" />
+    </div>
+  </div>
+
+  <button onclick="buscar()">Buscar</button>
+
+  <ul id="resultados"></ul>
+
+<script>
+async function buscar() {
+  const tema = document.getElementById('inputTema').value.toLowerCase().trim();
+  const orientador = document.getElementById('inputOrientador').value.toLowerCase().trim();
+  const ano = document.getElementById('inputAno').value.trim();
+
+  const lista = document.getElementById('resultados');
+  lista.innerHTML = '<li>Carregando resultados...</li>';
+
+  try {
+    const response = await fetch('base_tcc.json');
+    if(!response.ok) throw new Error('Falha ao carregar os dados');
+    const dados = await response.json();
+
+    const resultados = dados.filter(tcc => {
+      const titulo = (tcc.TÍTULO || '').toLowerCase();
+      const orient = (tcc.ORIENTADOR || '').toLowerCase();
+      const anoTcc = (tcc.ANO || '').toString();
+
+      const condTema = tema === '' || titulo.includes(tema);
+      const condOrientador = orientador === '' || orient.includes(orientador);
+      const condAno = ano === '' || ano === anoTcc;
+
+      return condTema && condOrientador && condAno;
+    });
+
+    if (resultados.length === 0) {
+      lista.innerHTML = '<li>Nenhum resultado encontrado.</li>';
+    } else {
+      lista.innerHTML = '';
+      resultados.forEach(tcc => {
+        const li = document.createElement('li');
+
+        const linkValido = tcc.LINK && tcc.LINK.trim() !== '' && (tcc.LINK.startsWith('http://') || tcc.LINK.startsWith('https://'));
+        const tituloComLink = linkValido 
+          ? `<a href="${tcc.LINK}" target="_blank" class="tcc-link">${tcc.TÍTULO || 'Sem título'}</a>`
+          : `${tcc.TÍTULO || 'Sem título'} <span class="link-indisponivel">(Link não disponível)</span>`;
+
+        li.innerHTML = `
+          <strong>${tituloComLink}</strong> (${tcc.ANO || 'Ano indefinido'})<br>
+          <em>Orientando:</em> ${tcc.ORIENTANDO || 'Não informado'}<br>
+          <em>Orientador:</em> ${tcc.ORIENTADOR || 'Não informado'}
+        `;
+        lista.appendChild(li);
+      });
+    }
+
+  } catch (error) {
+    lista.innerHTML = `<li>Erro: ${error.message}</li>`;
+  }
+}
+</script>
+
+</body>
+</html>
