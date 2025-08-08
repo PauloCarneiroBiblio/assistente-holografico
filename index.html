@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Assistente Holográfico de TCCs</title>
+<title>OrientaAI</title>
 <style>
-  /* Fundo com grid neon e animação suave */
+  /* Mesmo CSS que antes... */
   body {
     margin: 0; padding: 20px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -57,6 +57,7 @@
     user-select: none;
     transition: width 0.3s ease;
   }
+
   @keyframes flutuar {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-12px); }
@@ -78,6 +79,7 @@
     min-width: 150px;
     flex: 1 1 150px;
   }
+
   .filtro label {
     margin-bottom: 5px;
     font-weight: 600;
@@ -85,6 +87,7 @@
     text-shadow: 0 0 6px #00d4ff;
     user-select: none;
   }
+
   .filtro input {
     padding: 10px 12px;
     border-radius: 8px;
@@ -95,16 +98,27 @@
     outline: none;
     transition: box-shadow 0.3s ease, border-color 0.3s ease;
   }
+
   .filtro input::placeholder {
     color: #00f0ff88;
   }
+
   .filtro input:focus {
     border-color: #00d4ff;
     box-shadow: 0 0 15px #00d4ff;
   }
 
-  button {
+  /* Container dos botões e contador */
+  #btnContadorContainer {
     margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  button {
     padding: 12px 35px;
     font-size: 1.1em;
     background: linear-gradient(135deg, #00f0ff, #00b8d4);
@@ -119,11 +133,19 @@
     transition: background 0.3s ease, box-shadow 0.3s ease;
     user-select: none;
   }
+
   button:hover {
     background: linear-gradient(135deg, #00d4ff, #0099bb);
     box-shadow:
       0 0 18px #00e0ff,
       inset 0 0 20px #00b8d4;
+  }
+
+  #contadorResultados {
+    font-weight: 700;
+    color: #00f0ff;
+    text-shadow: 0 0 6px #00d4ff;
+    user-select: none;
   }
 
   #resultados {
@@ -140,6 +162,7 @@
     overflow-y: auto;
     color: #00eaff;
   }
+
   #resultados li {
     margin-bottom: 18px;
     line-height: 1.5em;
@@ -147,17 +170,21 @@
     padding-bottom: 12px;
     transition: background-color 0.3s ease;
   }
+
   #resultados li:last-child {
     border: none;
   }
+
   #resultados li:hover {
     background: rgba(0, 255, 255, 0.25);
     cursor: pointer;
   }
+
   a.tcc-link {
     color: #00f0ff;
     text-decoration: underline;
   }
+
   span.link-indisponivel {
     color: #ff4c4c;
     font-weight: 700;
@@ -170,6 +197,12 @@
       align-items: center;
     }
     .filtro {
+      width: 100%;
+      max-width: 350px;
+    }
+    #btnContadorContainer {
+      flex-direction: column;
+      gap: 8px;
       width: 100%;
       max-width: 350px;
     }
@@ -188,61 +221,63 @@
   <!-- Avatar holográfico -->
   <img id="avatar" src="avatar.gif" alt="Avatar Holográfico" />
 
-  <h1>Assistente Holográfico de TCCs</h1>
+  <h1>OrientaAI</h1>
 
   <!-- Filtros -->
   <div id="filtros">
     <div class="filtro">
-      <label for="inputTema">Tema</label>
-      <input type="text" id="inputTema" placeholder="Digite o tema" />
+      <label for="inputTema">Título</label>
+      <input type="text" id="inputTema" placeholder="Digite o título" />
     </div>
     <div class="filtro">
-      <label for="inputOrientador">Orientador</label>
-      <input type="text" id="inputOrientador" placeholder="Nome do orientador" />
+      <label for="inputOrientador">Orientador(a)</label>
+      <input type="text" id="inputOrientador" placeholder="Nome do(a) orientador(a)" />
     </div>
     <div class="filtro">
       <label for="inputAno">Ano</label>
       <input type="text" id="inputAno" placeholder="Ex: 2023" />
     </div>
+    <div class="filtro">
+      <label for="inputPalavraChave">Palavras-chave</label>
+      <input type="text" id="inputPalavraChave" placeholder="Ex: educação, IA, tecnologia..." />
+    </div>
   </div>
 
-  <button onclick="buscar()">Buscar</button>
+  <!-- Botões e contador de resultados -->
+  <div id="btnContadorContainer">
+    <button id="btnBuscar">Buscar</button>
+    <button id="btnMostrarTodos">Mostrar todos</button>
+    <span id="contadorResultados">Resultados: 0</span>
+  </div>
 
   <ul id="resultados"></ul>
 
 <script>
-async function buscar() {
-  const tema = document.getElementById('inputTema').value.toLowerCase().trim();
-  const orientador = document.getElementById('inputOrientador').value.toLowerCase().trim();
-  const ano = document.getElementById('inputAno').value.trim();
+  let dadosTCC = []; // Para armazenar os dados carregados
 
-  const lista = document.getElementById('resultados');
-  lista.innerHTML = '<li>Carregando resultados...</li>';
+  async function carregarDados() {
+    if(dadosTCC.length === 0) {
+      try {
+        const response = await fetch('base_tcc.json');
+        if (!response.ok) throw new Error('Falha ao carregar os dados');
+        dadosTCC = await response.json();
+      } catch (error) {
+        console.error('Erro ao carregar base de dados:', error);
+        return [];
+      }
+    }
+    return dadosTCC;
+  }
 
-  try {
-    const response = await fetch('base_tcc.json');
-    if(!response.ok) throw new Error('Falha ao carregar os dados');
-    const dados = await response.json();
+  async function mostrarResultados(listaTCC) {
+    const lista = document.getElementById('resultados');
+    lista.innerHTML = '';
 
-    const resultados = dados.filter(tcc => {
-      const titulo = (tcc.TÍTULO || '').toLowerCase();
-      const orient = (tcc.ORIENTADOR || '').toLowerCase();
-      const anoTcc = (tcc.ANO || '').toString();
-
-      const condTema = tema === '' || titulo.includes(tema);
-      const condOrientador = orientador === '' || orient.includes(orientador);
-      const condAno = ano === '' || ano === anoTcc;
-
-      return condTema && condOrientador && condAno;
-    });
-
-    if (resultados.length === 0) {
+    if(listaTCC.length === 0) {
       lista.innerHTML = '<li>Nenhum resultado encontrado.</li>';
     } else {
-      lista.innerHTML = '';
-      resultados.forEach(tcc => {
+      listaTCC.forEach(tcc => {
         const li = document.createElement('li');
-
         const linkValido = tcc.LINK && tcc.LINK.trim() !== '' && (tcc.LINK.startsWith('http://') || tcc.LINK.startsWith('https://'));
         const tituloComLink = linkValido 
           ? `<a href="${tcc.LINK}" target="_blank" class="tcc-link">${tcc.TÍTULO || 'Sem título'}</a>`
@@ -251,16 +286,57 @@ async function buscar() {
         li.innerHTML = `
           <strong>${tituloComLink}</strong> (${tcc.ANO || 'Ano indefinido'})<br>
           <em>Orientando:</em> ${tcc.ORIENTANDO || 'Não informado'}<br>
-          <em>Orientador:</em> ${tcc.ORIENTADOR || 'Não informado'}
+          <em>Orientador:</em> ${tcc.ORIENTADOR || 'Não informado'}<br>
+          <em>Palavras-chave:</em> ${tcc['PALAVRAS-CHAVE'] || 'Não informadas'}
         `;
         lista.appendChild(li);
       });
     }
-
-  } catch (error) {
-    lista.innerHTML = `<li>Erro: ${error.message}</li>`;
+    document.getElementById('contadorResultados').textContent = `Resultados: ${listaTCC.length}`;
   }
-}
+
+  async function buscar() {
+    const tema = document.getElementById('inputTema').value.toLowerCase().trim();
+    const orientador = document.getElementById('inputOrientador').value.toLowerCase().trim();
+    const ano = document.getElementById('inputAno').value.trim();
+    const palavraChave = document.getElementById('inputPalavraChave').value.toLowerCase().trim();
+
+    const lista = document.getElementById('resultados');
+    lista.innerHTML = '<li>Carregando resultados...</li>';
+    document.getElementById('contadorResultados').textContent = `Resultados: 0`;
+
+    const dados = await carregarDados();
+
+    const resultados = dados.filter(tcc => {
+      const titulo = (tcc.TÍTULO || '').toLowerCase();
+      const orient = (tcc.ORIENTADOR || '').toLowerCase();
+      const anoTcc = (tcc.ANO || '').toString();
+      const palavras = (tcc['PALAVRAS-CHAVE'] || '').toLowerCase();
+
+      const condTema = tema === '' || titulo.includes(tema);
+      const condOrientador = orientador === '' || orient.includes(orientador);
+      const condAno = ano === '' || ano === anoTcc;
+      const condPalavraChave = palavraChave === '' || palavras.includes(palavraChave);
+
+      return condTema && condOrientador && condAno && condPalavraChave;
+    });
+
+    mostrarResultados(resultados);
+  }
+
+  async function mostrarTodos() {
+    const lista = document.getElementById('resultados');
+    lista.innerHTML = '<li>Carregando todos os TCCs...</li>';
+    document.getElementById('contadorResultados').textContent = `Resultados: 0`;
+
+    const dados = await carregarDados();
+    mostrarResultados(dados);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('btnBuscar').addEventListener('click', buscar);
+    document.getElementById('btnMostrarTodos').addEventListener('click', mostrarTodos);
+  });
 </script>
 
 </body>
