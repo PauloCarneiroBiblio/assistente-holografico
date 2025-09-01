@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>OrientaAI</title>
 <style>
-  /* Mesmo CSS que antes... */
   body {
     margin: 0; padding: 20px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -108,7 +107,6 @@
     box-shadow: 0 0 15px #00d4ff;
   }
 
-  /* Container dos botões e contador */
   #btnContadorContainer {
     margin-top: 10px;
     display: flex;
@@ -191,7 +189,37 @@
     margin-left: 5px;
   }
 
+  /* CARD DESCRIÇÃO HOLOGRÁFICA */
+  #descricaoOrientaAI {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 400px;           /* maior largura */
+    max-height: 500px;      /* altura máxima com rolagem */
+    background: rgba(0, 255, 255, 0.12);
+    border-radius: 15px;
+    padding: 25px;
+    color: #00f0ff;
+    box-shadow: 0 0 30px #00d4ff, inset 0 0 40px #00f0ff;
+    font-size: 1.05rem;     /* fonte maior */
+    line-height: 1.6em;     /* mais espaçamento entre linhas */
+    text-align: justify;
+    z-index: 1000;
+    animation: flutuarCard 3s ease-in-out infinite;
+    overflow-y: auto;
+  }
+
+  @keyframes flutuarCard {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
   @media (max-width: 720px) {
+    #descricaoOrientaAI {
+      position: static;
+      width: 90%;
+      margin: 15px auto;
+    }
     #filtros {
       flex-direction: column;
       align-items: center;
@@ -223,6 +251,14 @@
 
   <h1>OrientaAI</h1>
 
+  <!-- Card de descrição holográfica -->
+  <div id="descricaoOrientaAI">
+    <p>
+      O assistente holográfico <strong>OrientaAI</strong> é um protótipo desenvolvido pelo discente da Faculdade de Biblioteconomia (FABIB), da Universidade Federal do Pará (UFPA), <strong>Paulo Victor Pereira Carneiro</strong>, sob a orientação da <strong>Profa. Dra. Ediane Maria Gheno</strong>, líder do Grupo de Pesquisa: MensureLab.<br>
+      <strong>OrientaAI</strong> é uma ferramenta que combina inteligência artificial e simulação holográfica para facilitar a busca e organização de informações de TCCs, promovendo uma experiência interativa e intuitiva para pesquisadores e estudantes.
+    </p>
+  </div>
+
   <!-- Filtros -->
   <div id="filtros">
     <div class="filtro">
@@ -253,7 +289,7 @@
   <ul id="resultados"></ul>
 
 <script>
-  let dadosTCC = []; // Para armazenar os dados carregados
+  let dadosTCC = [];
 
   async function carregarDados() {
     if(dadosTCC.length === 0) {
@@ -313,12 +349,10 @@
       const anoTcc = (tcc.ANO || '').toString();
       const palavras = (tcc['PALAVRAS-CHAVE'] || '').toLowerCase();
 
-      const condTema = tema === '' || titulo.includes(tema);
-      const condOrientador = orientador === '' || orient.includes(orientador);
-      const condAno = ano === '' || ano === anoTcc;
-      const condPalavraChave = palavraChave === '' || palavras.includes(palavraChave);
-
-      return condTema && condOrientador && condAno && condPalavraChave;
+      return (tema === '' || titulo.includes(tema)) &&
+             (orientador === '' || orient.includes(orientador)) &&
+             (ano === '' || ano === anoTcc) &&
+             (palavraChave === '' || palavras.includes(palavraChave));
     });
 
     mostrarResultados(resultados);
